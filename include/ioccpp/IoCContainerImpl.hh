@@ -22,7 +22,11 @@ void IoCContainer<T>::Register(const typename IoCContainer::object_ptr& o)
 }
 
 template <typename T>
-void IoCContainer<T>::RegisterFactory(const typename IoCContainer::factory_ptr& f)
+#ifdef QT_VERSION
+    void IoCContainer<T>::RegisterFactory(factory_ptr f)
+#else
+    void IoCContainer<T>::RegisterFactory(const typename IoCContainer::factory_ptr& f)
+#endif
 {
     if (!f)
         throw IoCError("Cannot register null factory", getTypeName<T>());
@@ -39,7 +43,11 @@ bool IoCContainer<T>::DoesInstanceExist()
 template <typename T>
 void IoCContainer<T>::Reset()
 {
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
+    instance().object.clear();
+#else
     instance().object.reset();
+#endif
 }
 
 template <typename T>

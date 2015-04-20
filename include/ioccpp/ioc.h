@@ -5,7 +5,10 @@
 
 #include "detect_cpp11.h"
 
-#ifdef IOCCPP_HAVE_CPP11
+#ifdef QT_VERSION
+#include <QSharedPointer>
+
+#elif IOCCPP_HAVE_CPP11
 #include <memory>
 #include <functional>
 namespace stdutil = std;
@@ -23,11 +26,21 @@ template <typename T>
 class IoCContainer
 {
 public:
+#ifdef QT_VERSION
+    typedef QSharedPointer<T> object_ptr;
+    typedef object_ptr ( *factory_ptr) (void) ;
+#else
     typedef stdutil::shared_ptr<T> object_ptr;
     typedef stdutil::function<object_ptr(void)> factory_ptr;
+#endif
 
     static void Register(const object_ptr& object);
+
+#ifdef QT_VERSION
+    static void RegisterFactory(factory_ptr factory);
+#else
     static void RegisterFactory(const factory_ptr& factory);
+#endif
 
     static bool DoesInstanceExist();
 
@@ -58,7 +71,11 @@ template <typename T>
 class IoCRegisterScoped
 {
 public:
+#ifdef QT_VERSION
+    typedef QSharedPointer<T> object_ptr;
+#else
     typedef stdutil::shared_ptr<T> object_ptr;
+#endif
 
     explicit IoCRegisterScoped(const object_ptr& object);
     ~IoCRegisterScoped();
